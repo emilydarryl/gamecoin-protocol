@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+
+# Build output
+build/
+dist/
+*.spec
+*.egg-info/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Runtime data
+/data/*
+/logs/*
+!/logs/README.txt
+/wallets/*.json
+/wallets/*.bak
+/wallets/*.backup
+*.wallet
+*.wallet.json
+
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Installer / archives
+*.exe
+*.msi
+*.zip
+*.7z
+*.tar
+*.tar.gz
