@@ -4,6 +4,7 @@ COIN = 100_000_000
 INITIAL_BLOCK_REWARD = 5 * COIN
 HALVING_INTERVAL_BLOCKS = 2_102_400
 TARGET_BLOCK_SECONDS = 150
+COINBASE_MATURITY = 100
 
 
 def block_subsidy(height: int) -> int:
@@ -15,6 +16,20 @@ def block_subsidy(height: int) -> int:
     if halvings >= 63:
         return 0
     return INITIAL_BLOCK_REWARD >> halvings
+
+
+def coinbase_is_mature(created_height: int, spend_height: int) -> bool:
+    """Return whether a coinbase output may be spent in ``spend_height``.
+
+    A coinbase created at height H becomes spendable in block H +
+    ``COINBASE_MATURITY``. For a mempool transaction, callers should use the
+    height of the next candidate block as ``spend_height``.
+    """
+    created_height = int(created_height)
+    spend_height = int(spend_height)
+    if created_height < 0 or spend_height < 0:
+        return False
+    return spend_height - created_height >= COINBASE_MATURITY
 
 
 def circulating_supply(height: int) -> int:
