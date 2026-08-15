@@ -1,0 +1,71 @@
+--- a/wallet_gui.py
++++ b/wallet_gui.py
+@@ -21,6 +21,7 @@
+ from urllib.parse import quote
+ 
+ from gamecoin.consensus import TARGET_BLOCK_SECONDS
++from gamecoin.policy import DEFAULT_TRANSACTION_FEE
+ from gamecoin.network import NETWORK_NAME, P2P_PROTOCOL
+ from gamecoin.rpc import request_json
+ from gamecoin.utils import address_from_pubkey, tx_id
+@@ -30,7 +31,7 @@
+     save_wallet, set_current_receive_index, sign_transaction_input,
+ )
+ 
+-APP_VERSION = '0.8.3'
++APP_VERSION = '0.9.0-dev'
+ UPDATE_MANIFEST_URL = 'https://emilygaming.com/gamecoin/latest.json'
+ DOWNLOAD_PAGE_URL = 'https://emilygaming.com/gamecoin/'
+ 
+@@ -252,15 +253,20 @@
+             owned = dict(item)
+             owned['owner_address'] = owner
+             utxos.append(owned)
++    spendable_utxos = [item for item in utxos if item.get('spendable', True)]
++    needed = amount + DEFAULT_TRANSACTION_FEE
+     selected: List[Dict[str, Any]] = []
+     total = 0
+-    for item in utxos:
++    for item in spendable_utxos:
+         selected.append(item)
+         total += int(item['amount'])
+-        if total >= amount:
++        if total >= needed:
+             break
+-    if total < amount:
+-        raise ValueError(f'Insufficient funds. Available: {format_amount(total)} GAME')
++    if total < needed:
++        raise ValueError(
++            f'Insufficient spendable funds. Available: {format_amount(total)} GAME; '
++            f'fee: {format_amount(DEFAULT_TRANSACTION_FEE)} GAME'
++        )
+     inputs: List[Dict[str, Any]] = []
+     owners: List[str] = []
+     for u in selected:
+@@ -268,7 +274,7 @@
+         owners.append(owner)
+         inputs.append({'txid': u['txid'], 'vout': int(u['vout']), 'pubkey': public_key_for_address(wallet, owner), 'signature': ''})
+     outputs = [{'address': to_address, 'amount': amount}]
+-    change = total - amount
++    change = total - amount - DEFAULT_TRANSACTION_FEE
+     if change:
+         wallet, change_record = generate_change_address(wallet)
+         save_wallet(wallet, str(wallet_path))
+@@ -631,7 +637,7 @@
+         ttk.Entry(amount_row, textvariable=self.amount_var, font=('Segoe UI', 11)).grid(row=0, column=0, sticky='ew')
+         tk.Label(amount_row, text='GAME', bg='#ffffff', fg=colors['purple_dark'], font=('Segoe UI', 10, 'bold')).grid(row=0, column=1, padx=(8, 0))
+         ttk.Button(send_card, text='Send GAME', command=self.send_clicked, style='Accent.TButton').grid(row=3, column=1, sticky='e', pady=(22, 0))
+-        tk.Label(send_card, text='No transaction fee is currently charged on this public testnet. A send is Pending until a miner includes it in a block.', bg='#ffffff', fg=colors['muted'], wraplength=850, justify='left').grid(row=4, column=0, columnspan=2, sticky='w', pady=(20, 0))
++        tk.Label(send_card, text=f'Default network fee: {format_amount(DEFAULT_TRANSACTION_FEE)} GAME. Fees are paid to the miner that confirms the transaction. A send is Pending until a miner includes it in a block.', bg='#ffffff', fg=colors['muted'], wraplength=850, justify='left').grid(row=4, column=0, columnspan=2, sticky='w', pady=(20, 0))
+ 
+         # Receive
+         self.receive_tab.columnconfigure(0, weight=1)
+@@ -1458,7 +1464,7 @@
+             return
+         if not messagebox.askyesno(
+             'Confirm Testnet Send',
+-            f'Send {amount_text} GAME to:\n\n{to_address}\n\nThis is the GameCoin testnet.',
++            f'Send {amount_text} GAME to:\n\n{to_address}\n\nNetwork fee: {format_amount(DEFAULT_TRANSACTION_FEE)} GAME\n\nThis is the GameCoin testnet.',
+             parent=self,
+         ):
+             return
