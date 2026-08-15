@@ -1,0 +1,29 @@
+name: GameCoin v0.9.0 Candidate CI
+
+on:
+  push:
+    branches: [v0.9.0-mainnet-candidate]
+  pull_request:
+    branches: [main, v0.9.0-mainnet-candidate]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  candidate-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Install dependencies
+        shell: bash
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then python -m pip install -r requirements.txt; fi
+      - name: Run consensus and node tests
+        shell: bash
+        run: python -m unittest discover -s tests -v
