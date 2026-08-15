@@ -1,0 +1,64 @@
+name: Run candidate source import
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: write
+  issues: read
+
+jobs:
+  import-candidate:
+    if: >-
+      github.event.issue.number == 2 &&
+      github.event.comment.body == '/import-candidate-source' &&
+      github.actor == 'emilydarryl'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out candidate branch
+        uses: actions/checkout@v4
+        with:
+          ref: v0.9.0-mainnet-candidate
+          fetch-depth: 0
+
+      - name: Reconstruct candidate archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat bootstrap/chunk*.b64 | base64 --decode > /tmp/gamecoin-v090.tar.xz
+          mkdir -p /tmp/gamecoin-v090
+          tar -xJf /tmp/gamecoin-v090.tar.xz -C /tmp/gamecoin-v090
+          test -f /tmp/gamecoin-v090/node.py
+          test -f /tmp/gamecoin-v090/wallet_gui.py
+          test -f /tmp/gamecoin-v090/gamecoin/consensus.py
+          test -f /tmp/gamecoin-v090/tests/test_candidate_node.py
+
+      - name: Import candidate source
+        shell: bash
+        run: |
+          set -euo pipefail
+          rsync -a /tmp/gamecoin-v090/ ./
+          rm -rf bootstrap
+          rm -f .github/workflows/bootstrap-candidate-import.yml
+          rm -f IMPORT_STATUS.md
+
+      - name: Run candidate tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s tests -v
+
+      - name: Commit candidate source
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          if git diff --cached --quiet; then
+            echo 'No candidate changes to commit.'
+          else
+            git commit -m 'Import GameCoin v0.9.0 Public Testnet v3 candidate source'
+            git push origin HEAD:v0.9.0-mainnet-candidate
+          fi
