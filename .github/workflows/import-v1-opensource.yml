@@ -1,6 +1,7 @@
 name: Import GameCoin v1.0.0 open-source source
 
 on:
+  workflow_dispatch:
   issue_comment:
     types: [created]
 
@@ -10,7 +11,7 @@ permissions:
 
 jobs:
   import-v1:
-    if: github.event.comment.body == '/import-v1-opensource-20260820'
+    if: github.event_name == 'workflow_dispatch' || github.event.comment.body == '/import-v1-opensource-20260820'
     runs-on: ubuntu-latest
     steps:
       - name: Check out bootstrap source branch
