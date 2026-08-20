@@ -31,7 +31,7 @@ jobs:
         run: |
           set -euo pipefail
           cat bootstrap-src/bootstrap/chunk*.b64 | base64 --decode > /tmp/gamecoin-opensource-tree.tar.xz
-          echo '062145c43b4abb89d1d931e01cda434cfc70c8af41dd4e8b43ffa68fe4e73468  /tmp/gamecoin-opensource-tree.tar.xz' | sha256sum -c -
+          echo '67ad7d6c7723f1dd722970c275890dd09202e183ced36a7760978dcf9739fd36  /tmp/gamecoin-opensource-tree.tar.xz' | sha256sum -c -
           mkdir -p /tmp/gamecoin-source
           tar -xJf /tmp/gamecoin-opensource-tree.tar.xz -C /tmp/gamecoin-source
 
@@ -42,7 +42,9 @@ jobs:
           cd target
           git rm -r --ignore-unmatch .
           cp -a /tmp/gamecoin-source/. .
-          python3 build_tools/restore_assets.py
+          python3 -m pip install --upgrade pip
+          python3 -m pip install -r requirements.txt -r build_tools/requirements-build.txt
+          python3 build_tools/render_assets.py
           python3 -m unittest discover -s tests -v
           rm -f assets/gamecoin_protocol_full.png assets/gamecoin_protocol_mark.png assets/gamecoin_protocol_mark.ico
           git add -A
