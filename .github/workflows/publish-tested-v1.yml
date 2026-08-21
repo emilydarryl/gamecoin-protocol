@@ -1,0 +1,54 @@
+name: Publish tested GameCoin v1.0.0 release
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/publish-tested-v1.yml'
+
+permissions:
+  actions: read
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download exact tested installer artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api repos/${{ github.repository }}/actions/artifacts/9429419393/zip > artifact.zip
+          mkdir artifact
+          unzip -q artifact.zip -d artifact
+          ls -la artifact
+
+      - name: Verify exact tested SHA-256
+        run: |
+          echo "295416d431925d85e124a3ab3be5725c40a2f434bd543293d62da7e6945b3dd8  artifact/GameCoin-Setup-v1.0.0-Mainnet.exe" | sha256sum -c -
+
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cat > release-notes.md <<'EOF'
+          GameCoin Mainnet v1.0.0
+
+          This is the exact GitHub-hosted Windows installer that was validated on a real Windows machine before publication.
+
+          Network: gamecoin-mainnet
+          P2P protocol: 6
+          Genesis: fb7282bd7a829af95ebcf32da284ab4eb2c807eb65eb6ec63aed86b9ec9a7233
+          Installer SHA-256: 295416d431925d85e124a3ab3be5725c40a2f434bd543293d62da7e6945b3dd8
+
+          This installer is currently unsigned while the project applies to SignPath Foundation for open-source code signing.
+          EOF
+
+          gh release create v1.0.0 \
+            artifact/GameCoin-Setup-v1.0.0-Mainnet.exe \
+            artifact/GameCoin-Setup-v1.0.0-Mainnet.exe.sha256.txt \
+            --repo ${{ github.repository }} \
+            --target 5a32eab1f39ae1f0bf1dd775e6c6ce46d3a23b2c \
+            --title "GameCoin Mainnet v1.0.0" \
+            --notes-file release-notes.md
