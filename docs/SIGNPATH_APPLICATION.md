@@ -11,6 +11,8 @@ This page contains the public, non-secret information prepared for the GameCoin 
 - **License:** MIT License
 - **Primary platform to sign:** Windows
 - **Initial signing target:** `GameCoin-Setup-v1.0.0-Mainnet.exe`
+- **Public download page:** https://emilygaming.com/gamecoin/
+- **Stable installer URL:** https://emilygaming.com/downloads/GameCoin-Setup-v1.0.0-Mainnet.exe
 
 ## Project description
 
@@ -30,8 +32,8 @@ The first GitHub-hosted v1.0.0 unsigned installer was successfully tested on Win
 
 - **Validated unsigned installer SHA-256:** `295416d431925d85e124a3ab3be5725c40a2f434bd543293d62da7e6945b3dd8`
 - **Release form:** Inno Setup Windows installer (`GameCoin-Setup-v1.0.0-Mainnet.exe`)
-
-Before submitting the application, provide SignPath with a stable public download/release URL for this release form if one is not already published.
+- **Stable public installer URL:** https://emilygaming.com/downloads/GameCoin-Setup-v1.0.0-Mainnet.exe
+- **Public release page:** https://github.com/emilydarryl/gamecoin-protocol/releases/tag/v1.0.0
 
 ## Code signing policy
 
@@ -66,7 +68,7 @@ The project is actively maintained and uses public GitHub Actions CI on Linux an
 ## Maintainer checks before submission
 
 1. Confirm GitHub multi-factor authentication is enabled for every Author, Reviewer, and Approver.
-2. Publish a stable public download/release URL for the unsigned v1.0.0 installer in the form that will be signed.
-3. Confirm the public download page includes or links the **Code signing policy** and privacy policy.
+2. Stable public download/release URL is published for the unsigned v1.0.0 installer in the form that will be signed.
+3. The public download page links the **Code signing policy** and privacy policy.
 4. Submit the SignPath Foundation application using the information above.
 5. Do not claim that GameCoin is signed by SignPath Foundation until acceptance and a successful signing request.
