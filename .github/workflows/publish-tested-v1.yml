@@ -28,7 +28,7 @@ jobs:
         run: |
           echo "295416d431925d85e124a3ab3be5725c40a2f434bd543293d62da7e6945b3dd8  artifact/GameCoin-Setup-v1.0.0-Mainnet.exe" | sha256sum -c -
 
-      - name: Publish GitHub release
+      - name: Publish or refresh GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -45,10 +45,37 @@ jobs:
           This installer is currently unsigned while the project applies to SignPath Foundation for open-source code signing.
           EOF
 
-          gh release create v1.0.0 \
-            artifact/GameCoin-Setup-v1.0.0-Mainnet.exe \
-            artifact/GameCoin-Setup-v1.0.0-Mainnet.exe.sha256.txt \
-            --repo ${{ github.repository }} \
-            --target 5a32eab1f39ae1f0bf1dd775e6c6ce46d3a23b2c \
-            --title "GameCoin Mainnet v1.0.0" \
-            --notes-file release-notes.md
+          if gh release view v1.0.0 --repo ${{ github.repository }} >/dev/null 2>&1; then
+            gh release upload v1.0.0 \
+              artifact/GameCoin-Setup-v1.0.0-Mainnet.exe \
+              artifact/GameCoin-Setup-v1.0.0-Mainnet.exe.sha256.txt \
+              --repo ${{ github.repository }} \
+              --clobber
+          else
+            gh release create v1.0.0 \
+              artifact/GameCoin-Setup-v1.0.0-Mainnet.exe \
+              artifact/GameCoin-Setup-v1.0.0-Mainnet.exe.sha256.txt \
+              --repo ${{ github.repository }} \
+              --target 5a32eab1f39ae1f0bf1dd775e6c6ce46d3a23b2c \
+              --title "GameCoin Mainnet v1.0.0" \
+              --notes-file release-notes.md
+          fi
+
+      - name: Record publication success
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          body=$(printf 'GameCoin v1.0.0 release published successfully.\nInstaller SHA-256: 295416d431925d85e124a3ab3be5725c40a2f434bd543293d62da7e6945b3dd8\n' | base64 -w0)
+          if gh api repos/${{ github.repository }}/contents/.github/release-v1.0.0-published.txt >/dev/null 2>&1; then
+            sha=$(gh api repos/${{ github.repository }}/contents/.github/release-v1.0.0-published.txt --jq .sha)
+            gh api --method PUT repos/${{ github.repository }}/contents/.github/release-v1.0.0-published.txt \
+              -f message='Confirm GameCoin v1.0.0 release publication' \
+              -f content="$body" \
+              -f sha="$sha" \
+              -f branch=main >/dev/null
+          else
+            gh api --method PUT repos/${{ github.repository }}/contents/.github/release-v1.0.0-published.txt \
+              -f message='Confirm GameCoin v1.0.0 release publication' \
+              -f content="$body" \
+              -f branch=main >/dev/null
+          fi
