@@ -42,11 +42,25 @@ python -m pip install -r requirements.txt
 python -m unittest discover -s tests -v
 ```
 
-On Windows, `BUILD_INSTALLER.bat` builds a local development installer. **Official release artifacts are intended to be built by the checked-in GitHub Actions release workflow** so the source/build origin can be verified.
+On Windows, `BUILD_INSTALLER.bat` builds a local development installer. **Official release artifacts are built by the checked-in GitHub Actions release workflow** so the source/build origin can be verified.
+
+The GitHub-hosted v1.0.0 Windows release pipeline has been validated end-to-end, and its resulting unsigned installer has been tested successfully on Windows. Public-trust signing is not active yet.
 
 ## Code signing policy
 
-GameCoin is being prepared for a SignPath Foundation open-source code-signing application. Public-trust signing is not active until SignPath Foundation accepts the project. See `CODE_SIGNING_POLICY.md` and `docs/SIGNPATH_SETUP.md`.
+GameCoin is applying for SignPath Foundation open-source code signing. Until acceptance and a successful signing request, GameCoin release installers remain unsigned and the acknowledgement below must not be interpreted as a claim that current binaries are signed.
+
+**Required SignPath acknowledgement for signed releases:**
+
+> Free code signing provided by SignPath.io, certificate by SignPath Foundation.
+
+SignPath team roles for GameCoin:
+
+- **Authors:** [@emilydarryl](https://github.com/emilydarryl)
+- **Reviewers:** [@emilydarryl](https://github.com/emilydarryl)
+- **Approvers:** [@emilydarryl](https://github.com/emilydarryl)
+
+See `CODE_SIGNING_POLICY.md` and `docs/SIGNPATH_SETUP.md` for the full policy and build/signing controls.
 
 ## Security and privacy
 
