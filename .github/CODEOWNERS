@@ -1,0 +1,12 @@
+# Official GameCoin maintainer / release approver
+* @emilydarryl
+
+# Treat release and consensus paths as explicitly owned.
+/.github/ @emilydarryl
+/.signpath/ @emilydarryl
+/build_tools/ @emilydarryl
+/gamecoin/ @emilydarryl
+/node.py @emilydarryl
+/miner.py @emilydarryl
+/wallet.py @emilydarryl
+/wallet_gui.py @emilydarryl

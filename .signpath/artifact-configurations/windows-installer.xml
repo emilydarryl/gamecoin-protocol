@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<artifact-configuration xmlns="http://signpath.io/artifact-configuration/v1">
+  <parameters>
+    <parameter name="version" default-value="1.0.0" required="true" />
+    <parameter name="fileVersion" default-value="1.0.0.0" required="true" />
+  </parameters>
+  <zip-file>
+    <pe-file path="GameCoin-Setup-v${version}-Mainnet.exe"
+             product-name="GameCoin Mainnet"
+             product-version="${version}"
+             file-version="${fileVersion}"
+             company-name="EmilyGaming"
+             copyright="Copyright (c) 2026 EmilyGaming"
+             original-filename="GameCoin-Setup-v${version}-Mainnet.exe">
+      <authenticode-sign description="GameCoin Mainnet"
+                         description-url="https://emilygaming.com/gamecoin/" />
+    </pe-file>
+  </zip-file>
+</artifact-configuration>

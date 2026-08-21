@@ -1,0 +1,32 @@
+GameCoin v1.0.0 Mainnet QA Report
+Generated: 2026-08-18 (America/New_York)
+
+Automated tests:
+- 37 tests run
+- 37 passed
+- 0 failed
+
+Live RPC smoke test:
+- network: gamecoin-mainnet
+- node_version: 1.0.0
+- p2p_protocol: 6
+- height: 0
+- circulating_supply: 0
+- seed_mode: true
+- genesis: fb7282bd7a829af95ebcf32da284ab4eb2c807eb65eb6ec63aed86b9ec9a7233
+- user-submitted coinbase: REJECTED (Coinbase transactions cannot be submitted to the mempool)
+- testnet G-prefixed mining address: REJECTED
+
+Separation checks:
+- Mainnet address prefix: M
+- Mainnet wallet format: gamecoin-mainnet-wallet
+- RPC/P2P: 22444/22445
+- Windows data identity: GameCoinMainnet
+- Frozen executable names are mainnet-specific
+- Foreign/testnet chain.json causes fail-closed startup and is not modified
+- Original testnet runtime folders/chain data are not included in this package
+
+Important:
+This QA is not an independent cryptographic/security audit. Before assigning material value,
+verify the packaged Windows binary on a clean machine, operate multiple independent peers,
+and complete RELEASE_CHECKLIST.md.

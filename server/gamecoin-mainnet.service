@@ -1,0 +1,21 @@
+[Unit]
+Description=GameCoin v1.0.0 Mainnet Seed Node
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=gamecoin
+Group=gamecoin
+WorkingDirectory=/opt/gamecoin-mainnet
+ExecStart=/opt/gamecoin-mainnet/.venv/bin/python /opt/gamecoin-mainnet/node.py --seed-mode --rpc-host 127.0.0.1 --rpc-port 22444 --p2p-host 0.0.0.0 --p2p-port 22445 --data-dir /opt/gamecoin-mainnet/data --log-dir /opt/gamecoin-mainnet/logs
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=true
+ReadWritePaths=/opt/gamecoin-mainnet/data /opt/gamecoin-mainnet/logs
+
+[Install]
+WantedBy=multi-user.target

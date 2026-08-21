@@ -1,0 +1,11 @@
+GameCoin Mainnet v1.0.0
+
+- Network: gamecoin-mainnet
+- Local RPC: 127.0.0.1:22444
+- Default peer: emilygaming.com:22445
+- Mainnet addresses begin with M. Testnet G-addresses are rejected.
+- New wallets are encrypted by default and require a password.
+- Back up the encrypted wallet file before receiving funds.
+- Coinbase rewards mature after 100 blocks.
+- Initial subsidy is 5 GAME; target block interval is 150 seconds.
+- Genesis has no spendable premine.

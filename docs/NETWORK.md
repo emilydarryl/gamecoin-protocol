@@ -1,27 +1,16 @@
-# GameCoin Network Reference
+# GameCoin Mainnet Network Separation
 
-## Public Testnet v2
+GameCoin Mainnet is intentionally isolated from all public testnets.
 
-Current v0.8.3 testnet settings:
+- Network: `gamecoin-mainnet`
+- Protocol: `6`
+- Genesis: `fb7282bd7a829af95ebcf32da284ab4eb2c807eb65eb6ec63aed86b9ec9a7233`
+- RPC: `127.0.0.1:22444`
+- P2P: `22445`
+- Windows data identity: `GameCoinMainnet`
+- Default source data/log directories: `data-mainnet` / `logs-mainnet`
+- Mainnet address prefix: `M`
 
-- Network ID: `gamecoin-public-testnet-v2`
-- P2P protocol: `3`
-- Default public P2P port: `18445`
-- Local wallet/miner RPC: `127.0.0.1:18444`
-- Target block interval: `150 seconds`
+Known older test chains use different network IDs, protocol identities, genesis hashes, ports and `G` addresses. Mainnet never imports their balances, mempool or chain history. If mainnet is pointed at a data directory whose `chain.json` has a different genesis, startup fails without modifying the foreign chain.
 
-The localhost RPC port must not be exposed publicly.
-
-## Mainnet separation requirement
-
-Mainnet should use its own:
-
-- network ID
-- genesis block/hash
-- P2P protocol version if consensus/network behavior changes
-- ports
-- data directory
-- address version/prefix
-- seed list
-
-Testnet should remain operational after mainnet launch so future releases can be tested against a non-value network first.
+Only P2P port 22445 should be exposed publicly. RPC 22444 must remain localhost-only.

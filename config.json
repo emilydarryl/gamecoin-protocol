@@ -1,0 +1,13 @@
+{
+  "rpc_host": "127.0.0.1",
+  "rpc_port": 22444,
+  "p2p_host": "127.0.0.1",
+  "p2p_port": 22445,
+  "seed_mode": false,
+  "peers": [
+    "emilygaming.com:22445"
+  ],
+  "sync_interval_seconds": 2,
+  "data_dir": "data-mainnet",
+  "log_dir": "logs-mainnet"
+}

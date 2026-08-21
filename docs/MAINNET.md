@@ -1,47 +1,27 @@
-# GameCoin Mainnet Readiness Plan
+# GameCoin Mainnet v1.0.0
 
-GameCoin v0.8.3 is the public-testnet baseline. Mainnet should not launch by renaming or reusing the current testnet chain.
+## Genesis
 
-## v0.9.0 Mainnet Candidate priorities
+- Timestamp: `1787103720` (2026-08-19 01:42:00 UTC / 2026-08-18 20:42:00 UTC-05:00)
+- Message: `GameCoin mainnet genesis 2026-08-18 | v1.0.0 | subsidy 5 GAME | halving 2102400 | target 150s | no premine`
+- Genesis transaction: `2d55c15612d66f18f0f5e6c7151fefbcb19a285cfdaa67bd342894a14499d8a1`
+- Genesis block: `fb7282bd7a829af95ebcf32da284ab4eb2c807eb65eb6ec63aed86b9ec9a7233`
+- Spendable genesis outputs: none
 
-### Consensus
+The first spendable issuance is the block-1 mining reward.
 
-- replace floating-point cumulative work with deterministic integer chainwork
-- select forks by greatest valid cumulative proof-of-work
-- remove any seed-authority chain replacement path
-- add median-time-past and future-time limits
-- add coinbase maturity
-- define transaction fees and miner fee collection
-- enforce strict address checksums and canonical formatting
-- cap transaction/block/mempool resource usage
+## Release identity
 
-### Wallet and keys
+Mainnet uses network `gamecoin-mainnet`, P2P protocol 6, RPC/P2P ports 22444/22445, a separate Windows installer AppId/data directory, and `M...` addresses. Testnet chains and wallets are not migrated.
 
-- encrypt wallet secrets at rest
-- add lock/unlock behavior
-- define backup/recovery workflow
-- keep mining possible while locked if practical; require unlock for spending
+## Launch prerequisites
 
-### Networking
+Before treating the network as production-ready with material value:
 
-- support multiple independent seed nodes
-- improve peer discovery and peer rotation
-- ensure nodes remain usable if any one seed or website is unavailable
-
-### Testing
-
-Before mainnet genesis:
-
-- freeze consensus rules
-- add deterministic consensus test vectors
-- test competing forks and reorgs
-- test node crashes and restart recovery
-- test malformed blocks and transactions
-- test clock skew and timestamp edge cases
-- test wallet backup/restore
-- test upgrade paths
-- run an extended multi-node soak test for at least roughly 10,000 blocks
-
-## Mainnet launch
-
-The mainnet launch should create a brand-new chain starting at height 0 with a new genesis block and no carried-over testnet balances.
+1. Run the complete automated test suite.
+2. Re-run malformed transaction, duplicate-input, missing-input and explicit coinbase-submission tests against the packaged Windows binary.
+3. Verify two independent machines produce the same genesis and status identity.
+4. Operate at least two independent public P2P seeds/peers and test fresh-node synchronization/reorg behavior.
+5. Back up and restore encrypted wallets on a separate machine.
+6. Publish installer/source SHA-256 hashes and verify them from a clean host.
+7. Keep RPC bound to localhost and expose only TCP 22445 on seed nodes.

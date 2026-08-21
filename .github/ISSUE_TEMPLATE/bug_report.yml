@@ -1,0 +1,41 @@
+name: Bug report
+description: Report a reproducible GameCoin defect that is not a private security vulnerability.
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not put private keys, wallet seeds, passwords, wallet files, or exploitable security details in a public issue. See SECURITY.md for private reporting.
+  - type: input
+    id: version
+    attributes:
+      label: GameCoin version
+      placeholder: 1.0.0
+    validations:
+      required: true
+  - type: input
+    id: platform
+    attributes:
+      label: Platform
+      placeholder: Windows 11 64-bit / Ubuntu 24.04 / etc.
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What happened and what did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Reproduction steps
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Sanitized logs or status output
+      description: Remove secrets and private wallet material before posting.

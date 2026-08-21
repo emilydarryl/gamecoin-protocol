@@ -1,25 +1,71 @@
-# GameCoin Protocol
+# GameCoin Protocol — Mainnet v1.0.0
 
-GameCoin is an experimental CPU-mineable cryptocurrency protocol being developed for EmilyGaming.
+GameCoin is an open-source proof-of-work cryptocurrency protocol with an encrypted desktop wallet, CPU miner, full node, deterministic consensus rules, Windows packaging, and seed-node deployment files.
 
-## Current status
+The code is published under the **MIT License** so it can be inspected, audited, built, and forked. Open source does **not** give a fork control over the official GameCoin Mainnet: incompatible consensus changes are accepted only by nodes that choose to run those changed rules. See `GOVERNANCE.md`.
 
-The current baseline is **v0.8.3 Public Testnet v2**. This repository is private while the protocol is being hardened for a future mainnet candidate.
+## Mainnet identity
 
-Current public-testnet parameters:
-
-- Network: `gamecoin-public-testnet-v2`
-- P2P protocol: `3`
+- Network: `gamecoin-mainnet`
+- P2P protocol: `6`
+- Genesis: `fb7282bd7a829af95ebcf32da284ab4eb2c807eb65eb6ec63aed86b9ec9a7233`
+- Mainnet RPC: `127.0.0.1:22444` (localhost only)
+- Mainnet P2P: `22445`
+- Mainnet address prefix: `M`
 - Target block time: `150 seconds`
-- Initial block reward: `5 GAME`
+- Initial subsidy: `5 GAME`
 - Halving interval: `2,102,400 blocks`
-- Bootstrap difficulty: `1,000x`
-- Genesis: `15318ffdacb299fcf99464f9b98e5796f6629144db5b2c7f2bc2554168ea1b9b`
+- Coinbase maturity: `100 blocks`
+- Default wallet fee: `0.001 GAME`
+- Genesis premine: `0 GAME`
 
-## Mainnet work
+## Monetary policy
 
-Mainnet has **not launched**. Development after this baseline focuses on consensus and wallet hardening before a v0.9.0 mainnet-candidate testnet.
+One GAME equals 100,000,000 atoms. Block 0 has no spendable outputs. Block 1 begins the normal 5 GAME subsidy. The subsidy halves every 2,102,400 blocks using integer-atom arithmetic until it reaches zero.
 
-See `docs/CONSENSUS.md`, `docs/NETWORK.md`, `docs/MAINNET.md`, and `SECURITY.md` for project notes.
+## Consensus baseline
 
-Test coins have no monetary value.
+Mainnet freezes the candidate-2 consensus baseline proven on Public Testnet v4: deterministic integer chainwork, greatest-valid-work fork choice, median-time-past timestamp rules, adaptive-window-v0.6 difficulty, coinbase maturity, miner fee collection, strict address checksum validation, and transaction/block/mempool resource ceilings.
+
+Normal transactions may not contain a `coinbase` field. Coinbase transactions are block-only and are rejected by RPC/P2P mempool submission before any already-known-TXID shortcut.
+
+## Wallet separation
+
+Mainnet wallets use the `gamecoin-mainnet-wallet` format and `M...` addresses. Testnet wallet files and testnet `G...` addresses are intentionally rejected. New wallets are encrypted by default with Argon2id + AES-256-GCM.
+
+## Build and test
+
+Install dependencies and run the unit tests:
+
+```bash
+python -m pip install -r requirements.txt
+python -m unittest discover -s tests -v
+```
+
+On Windows, `BUILD_INSTALLER.bat` builds a local development installer. **Official release artifacts are intended to be built by the checked-in GitHub Actions release workflow** so the source/build origin can be verified.
+
+## Code signing policy
+
+GameCoin is being prepared for a SignPath Foundation open-source code-signing application. Public-trust signing is not active until SignPath Foundation accepts the project. See `CODE_SIGNING_POLICY.md` and `docs/SIGNPATH_SETUP.md`.
+
+## Security and privacy
+
+GameCoin is experimental cryptocurrency software and this source distribution is not an independent security audit. Before operating with material value, keep multiple tested backups, verify the genesis hash and release hashes/signatures, run more than one independent seed/peer, and complete `RELEASE_CHECKLIST.md`.
+
+- Security reporting: `SECURITY.md`
+- Privacy/network communications: `PRIVACY.md`
+- Experimental-software disclaimer: `DISCLAIMER.md`
+
+## Contributing and governance
+
+- Contribution guide: `CONTRIBUTING.md`
+- Project governance and official-release control: `GOVERNANCE.md`
+- Name/branding policy: `TRADEMARKS.md`
+
+## Protocol documentation
+
+See `docs/CONSENSUS.md`, `docs/NETWORK.md`, `docs/MAINNET.md`, and `server/VPS_SETUP.md`.
+
+## License
+
+Copyright (c) 2026 EmilyGaming. Unless a file explicitly states otherwise, the original code, documentation, build files, and bundled project artwork in this repository are licensed under the MIT License. Trademark/source-identifying rights in the GameCoin name and logos are addressed separately in `TRADEMARKS.md`.
