@@ -50,6 +50,8 @@ jobs:
           cd target
           git rm -r --ignore-unmatch .
           cp -a /tmp/gamecoin-source/. .
+          rm -rf .github/workflows
+          git restore --source=HEAD -- .github/workflows 2>/dev/null || true
           python3 -m pip install --upgrade pip
           python3 -m pip install -r requirements.txt -r build_tools/requirements-build.txt
           python3 build_tools/render_assets.py
