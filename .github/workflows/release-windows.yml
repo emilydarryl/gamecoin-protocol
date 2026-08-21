@@ -1,0 +1,104 @@
+name: Build GameCoin Windows release
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/release-windows.yml'
+      - 'assets/**'
+      - 'build_tools/**'
+      - 'gamecoin/**'
+      - 'tests/**'
+      - 'node.py'
+      - 'miner.py'
+      - 'wallet.py'
+      - 'wallet_gui.py'
+      - 'requirements.txt'
+
+permissions:
+  contents: read
+
+jobs:
+  verify-and-assets:
+    name: Verify source and render assets
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Install Tkinter
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-tk
+
+      - name: Install Python dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install -r requirements.txt -r build_tools/requirements-build.txt
+
+      - name: Run complete test suite
+        run: python3 -m unittest discover -s tests -v
+
+      - name: Verify fixed mainnet identity
+        run: >-
+          python3 -c "import node; assert node.NETWORK_NAME == 'gamecoin-mainnet'; assert node.P2P_PROTOCOL == 6; assert node.GENESIS_HASH == 'fb7282bd7a829af95ebcf32da284ab4eb2c807eb65eb6ec63aed86b9ec9a7233'; print('Verified genesis:', node.GENESIS_HASH)"
+
+      - name: Render deterministic branding assets
+        run: python3 build_tools/render_assets.py
+
+      - name: Upload rendered assets
+        uses: actions/upload-artifact@v4
+        with:
+          name: gamecoin-release-assets
+          if-no-files-found: error
+          retention-days: 1
+          path: |
+            assets/gamecoin_protocol_full.png
+            assets/gamecoin_protocol_mark.png
+            assets/gamecoin_protocol_mark.ico
+
+  windows-installer:
+    name: Build Windows installer
+    needs: verify-and-assets
+    runs-on: windows-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Download verified branding assets
+        uses: actions/download-artifact@v4
+        with:
+          name: gamecoin-release-assets
+          path: assets
+
+      - name: Build installer from verified source
+        shell: pwsh
+        env:
+          GAMECOIN_PREBUILT_ASSETS: '1'
+        run: ./build_tools/build_windows.ps1
+
+      - name: Generate SHA-256 checksum
+        shell: pwsh
+        run: |
+          $Installer = 'dist/GameCoin-Setup-v1.0.0-Mainnet.exe'
+          if (-not (Test-Path $Installer)) { throw "Installer not found: $Installer" }
+          $Hash = (Get-FileHash -Algorithm SHA256 $Installer).Hash.ToLowerInvariant()
+          "$Hash  GameCoin-Setup-v1.0.0-Mainnet.exe" | Set-Content -Encoding ascii 'dist/GameCoin-Setup-v1.0.0-Mainnet.exe.sha256.txt'
+          Write-Host "SHA-256: $Hash"
+
+      - name: Upload unsigned release candidate
+        uses: actions/upload-artifact@v4
+        with:
+          name: GameCoin-v1.0.0-Mainnet-unsigned
+          if-no-files-found: error
+          retention-days: 14
+          path: |
+            dist/GameCoin-Setup-v1.0.0-Mainnet.exe
+            dist/GameCoin-Setup-v1.0.0-Mainnet.exe.sha256.txt
