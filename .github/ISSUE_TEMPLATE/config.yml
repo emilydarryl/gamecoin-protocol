@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Private security report
+    url: https://github.com/emilydarryl/gamecoin-protocol/security
+    about: Use GitHub security reporting for exploitable vulnerabilities once enabled.

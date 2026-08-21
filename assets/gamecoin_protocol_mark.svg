@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title desc">
+  <title id="title">GameCoin Protocol</title>
+  <desc id="desc">Gold and electric-blue GameCoin protocol coin mark.</desc>
+  <defs>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fff2a3"/>
+      <stop offset="0.28" stop-color="#ffd84d"/>
+      <stop offset="0.62" stop-color="#f0a711"/>
+      <stop offset="1" stop-color="#9b5600"/>
+    </linearGradient>
+    <radialGradient id="blue" cx="42%" cy="34%" r="72%">
+      <stop offset="0" stop-color="#123f85"/>
+      <stop offset="0.58" stop-color="#071f4a"/>
+      <stop offset="1" stop-color="#04142f"/>
+    </radialGradient>
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="2.4" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <circle cx="64" cy="64" r="58" fill="#041329" stroke="#0a2b5b" stroke-width="4"/>
+  <circle cx="64" cy="64" r="54" fill="url(#blue)" stroke="url(#gold)" stroke-width="7"/>
+  <circle cx="64" cy="64" r="44" fill="none" stroke="#16cfff" stroke-width="2.5" opacity="0.9" filter="url(#glow)"/>
+  <g fill="none" stroke="#19d6ff" stroke-width="2" stroke-linecap="round" opacity="0.95" filter="url(#glow)">
+    <path d="M25 45h13l7 7h9"/><circle cx="25" cy="45" r="2.3" fill="#19d6ff"/>
+    <path d="M24 77h14l7-7h8"/><circle cx="24" cy="77" r="2.3" fill="#19d6ff"/>
+    <path d="M76 30v11l8 8h15"/><circle cx="99" cy="49" r="2.3" fill="#19d6ff"/>
+    <path d="M81 91v-9l8-8h14"/><circle cx="103" cy="74" r="2.3" fill="#19d6ff"/>
+  </g>
+  <g fill="url(#gold)" stroke="#503000" stroke-width="1.5">
+    <rect x="31" y="31" width="5" height="5" rx="1"/><rect x="91" y="33" width="5" height="5" rx="1"/>
+    <rect x="29" y="91" width="5" height="5" rx="1"/><rect x="94" y="90" width="5" height="5" rx="1"/>
+  </g>
+  <text x="64" y="83" text-anchor="middle" font-family="Arial Black, Arial, sans-serif" font-size="65" font-weight="900" fill="url(#gold)" stroke="#422700" stroke-width="2.2" paint-order="stroke fill">G</text>
+  <path d="M50 102h28" stroke="#16cfff" stroke-width="2.5" stroke-linecap="round" filter="url(#glow)"/>
+  <circle cx="64" cy="64" r="58" fill="none" stroke="#168dff" stroke-width="1.5" opacity="0.65" filter="url(#glow)"/>
+</svg>

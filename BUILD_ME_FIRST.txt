@@ -1,0 +1,17 @@
+GAMECOIN MAINNET v1.0.0 - WINDOWS BUILDER
+
+1. Run setup_windows.bat once.
+2. Run BUILD_INSTALLER.bat.
+3. The Windows installer will be written to:
+
+   dist\GameCoin-Setup-v1.0.0-Mainnet.exe
+   dist\GameCoin-Setup-v1.0.0-Mainnet.sha256.txt
+
+Mainnet defaults:
+- RPC: 127.0.0.1:22444 (localhost only)
+- P2P: 22445
+- Network: gamecoin-mainnet
+- Protocol: 6
+- Mainnet addresses begin with M
+
+Do not point this build at a testnet data directory. Mainnet fails closed on a genesis mismatch.

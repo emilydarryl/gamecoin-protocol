@@ -1,49 +1,44 @@
+# Secrets / wallets
+.env
+.env.*
+*.wallet.json
+wallets/
+wallet-backup*/
+*.key
+*.pem
+*.seed
+
+# Runtime state
+data/
+data-mainnet/
+logs/
+logs-mainnet/
+*.pid
+
 # Python
 __pycache__/
 *.py[cod]
-*.pyo
 .venv/
 venv/
+.pytest_cache/
+.coverage
 
 # Build output
 build/
 dist/
 *.spec
-*.egg-info/
-.pytest_cache/
-.coverage
-htmlcov/
-
-# Runtime data
-/data/*
-/logs/*
-!/logs/README.txt
-/wallets/*.json
-/wallets/*.bak
-/wallets/*.backup
-*.wallet
-*.wallet.json
-
-# Secrets and local configuration
-.env
-.env.*
-!.env.example
-*.pem
-*.key
-*.p12
-*.pfx
+*.exe
+*.msi
+*.sha256.txt
 
 # Editors / OS
 .vscode/
 .idea/
 .DS_Store
 Thumbs.db
-desktop.ini
-
-# Installer / archives
-*.exe
-*.msi
-*.zip
-*.7z
-*.tar
-*.tar.gz
+*.pfx
+*.p12
+*.cer
+*.crt
+signed/
+release/

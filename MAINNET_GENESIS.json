@@ -1,0 +1,19 @@
+{
+  "difficulty": 0,
+  "hash": "fb7282bd7a829af95ebcf32da284ab4eb2c807eb65eb6ec63aed86b9ec9a7233",
+  "height": 0,
+  "merkle_root": "2d55c15612d66f18f0f5e6c7151fefbcb19a285cfdaa67bd342894a14499d8a1",
+  "nonce": 0,
+  "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+  "timestamp": 1787103720,
+  "transactions": [
+    {
+      "coinbase": "GameCoin mainnet genesis 2026-08-18 | v1.0.0 | subsidy 5 GAME | halving 2102400 | target 150s | no premine",
+      "inputs": [],
+      "outputs": [],
+      "timestamp": 1787103720,
+      "txid": "2d55c15612d66f18f0f5e6c7151fefbcb19a285cfdaa67bd342894a14499d8a1"
+    }
+  ],
+  "version": 1
+}

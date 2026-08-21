@@ -4,9 +4,9 @@ import urllib.parse
 import urllib.request
 from typing import Any, Dict, Iterable, List, Optional
 
-NETWORK_NAME = 'gamecoin-public-testnet-v2'
-P2P_PROTOCOL = 3
-DEFAULT_P2P_PORT = 18445
+NETWORK_NAME = 'gamecoin-mainnet'
+P2P_PROTOCOL = 6
+DEFAULT_P2P_PORT = 22445
 MAX_P2P_RESPONSE_BYTES = 8 * 1024 * 1024
 
 
@@ -49,7 +49,7 @@ def p2p_request(peer: str, path: str, method: str = 'GET', body: Optional[Dict[s
     data = None
     headers = {
         'Accept': 'application/json',
-        'User-Agent': 'GameCoinPublicTestnet/0.8.3',
+        'User-Agent': 'GameCoinMainnet/1.0.0',
     }
     if body is not None:
         data = json.dumps(body, separators=(',', ':')).encode('utf-8')

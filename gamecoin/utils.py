@@ -39,10 +39,46 @@ def b58encode(data: bytes) -> str:
     return (ALPHABET[:1] * pad + bytes(reversed(out or b'1'))).decode('ascii')
 
 
+def b58decode(text: str) -> bytes:
+    raw = str(text).encode('ascii')
+    if not raw:
+        raise ValueError('Empty base58 value')
+    indexes = {char: index for index, char in enumerate(ALPHABET)}
+    n = 0
+    for char in raw:
+        if char not in indexes:
+            raise ValueError('Invalid base58 character')
+        n = n * 58 + indexes[char]
+    decoded = b'' if n == 0 else n.to_bytes((n.bit_length() + 7) // 8, 'big')
+    pad = 0
+    for char in raw:
+        if char == ALPHABET[0]:
+            pad += 1
+        else:
+            break
+    return b'\x00' * pad + decoded
+
+
 def address_from_pubkey(pubkey: bytes) -> str:
     payload = hashlib.sha256(pubkey).digest()[:20]
     checksum = sha256d(payload)[:4]
-    return 'G' + b58encode(payload + checksum)
+    return 'M' + b58encode(payload + checksum)
+
+
+def validate_address(address: str) -> bool:
+    value = str(address or '')
+    if not value.startswith('M') or len(value) < 2:
+        return False
+    try:
+        decoded = b58decode(value[1:])
+    except (ValueError, UnicodeEncodeError):
+        return False
+    if len(decoded) != 24:
+        return False
+    payload, checksum = decoded[:-4], decoded[-4:]
+    if checksum != sha256d(payload)[:4]:
+        return False
+    return 'M' + b58encode(decoded) == value
 
 
 def tx_id(tx: Dict[str, Any]) -> str:

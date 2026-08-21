@@ -1,9 +1,18 @@
-"""Consensus constants and monetary policy for GameCoin public testnet v2."""
+"""Consensus constants and monetary policy for GameCoin Mainnet."""
 
 COIN = 100_000_000
 INITIAL_BLOCK_REWARD = 5 * COIN
 HALVING_INTERVAL_BLOCKS = 2_102_400
 TARGET_BLOCK_SECONDS = 150
+COINBASE_MATURITY = 100
+
+# Consensus resource ceilings frozen for GameCoin Mainnet v1.0.0.
+MAX_TX_INPUTS = 128
+MAX_TX_OUTPUTS = 128
+MAX_TX_BYTES = 100_000
+MAX_BLOCK_TRANSACTIONS = 1_000
+MAX_BLOCK_BYTES = 2_000_000
+MAX_MEMPOOL_TRANSACTIONS = 5_000
 
 
 def block_subsidy(height: int) -> int:
@@ -15,6 +24,15 @@ def block_subsidy(height: int) -> int:
     if halvings >= 63:
         return 0
     return INITIAL_BLOCK_REWARD >> halvings
+
+
+def coinbase_is_mature(created_height: int, spend_height: int) -> bool:
+    """Return whether a coinbase output may be spent in ``spend_height``."""
+    created_height = int(created_height)
+    spend_height = int(spend_height)
+    if created_height < 0 or spend_height < 0:
+        return False
+    return spend_height - created_height >= COINBASE_MATURITY
 
 
 def circulating_supply(height: int) -> int:
@@ -50,8 +68,7 @@ def next_halving_height(height: int) -> int | None:
     if current_reward <= 0:
         return None
     era = height // HALVING_INTERVAL_BLOCKS
-    transition = (era + 1) * HALVING_INTERVAL_BLOCKS + 1
-    return transition
+    return (era + 1) * HALVING_INTERVAL_BLOCKS + 1
 
 
 def blocks_until_halving(height: int) -> int | None:
@@ -59,6 +76,4 @@ def blocks_until_halving(height: int) -> int | None:
     nxt = next_halving_height(height)
     if nxt is None:
         return None
-    # At height H, the next candidate block is H+1. If that candidate is the
-    # transition block, zero blocks remain at the old reward.
     return max(0, nxt - (int(height) + 1))
