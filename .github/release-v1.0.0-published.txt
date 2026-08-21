@@ -1,0 +1,2 @@
+GameCoin v1.0.0 release published successfully.
+Installer SHA-256: 295416d431925d85e124a3ab3be5725c40a2f434bd543293d62da7e6945b3dd8
