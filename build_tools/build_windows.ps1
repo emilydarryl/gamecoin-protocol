@@ -114,9 +114,24 @@ if ($LASTEXITCODE -ne 0) { throw "Mainnet identity/genesis verification failed; 
 
 Remove-Item -Recurse -Force build, dist -ErrorAction SilentlyContinue
 
-Write-Host 'Generating branding assets from versioned SVG...'
-py -3 build_tools\render_assets.py
-if ($LASTEXITCODE -ne 0) { throw 'Asset generation failed.' }
+$RequiredAssets = @(
+    'assets\gamecoin_protocol_full.png',
+    'assets\gamecoin_protocol_mark.png',
+    'assets\gamecoin_protocol_mark.ico'
+)
+
+if ($env:GAMECOIN_PREBUILT_ASSETS -eq '1') {
+    Write-Host 'Using pre-rendered branding assets supplied by the trusted build workflow...'
+    foreach ($asset in $RequiredAssets) {
+        if (-not (Test-Path $asset)) {
+            throw "Required pre-rendered asset is missing: $asset"
+        }
+    }
+} else {
+    Write-Host 'Generating branding assets from versioned SVG...'
+    py -3 build_tools\render_assets.py
+    if ($LASTEXITCODE -ne 0) { throw 'Asset generation failed.' }
+}
 
 $Icon = 'assets\gamecoin_protocol_mark.ico'
 $AssetData = 'assets;assets'
