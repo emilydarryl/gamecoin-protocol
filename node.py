@@ -14,10 +14,10 @@ from urllib.parse import parse_qs, urlparse
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
 
 from gamecoin.consensus import (
-    COINBASE_MATURITY, HALVING_INTERVAL_BLOCKS, INITIAL_BLOCK_REWARD, MAX_SUPPLY,
+    COINBASE_MATURITY, COINBASE_MATURITY_ACTIVATION_HEIGHT, HALVING_INTERVAL_BLOCKS, INITIAL_BLOCK_REWARD, MAX_SUPPLY,
     MAX_BLOCK_BYTES, MAX_BLOCK_TRANSACTIONS, MAX_MEMPOOL_TRANSACTIONS, MAX_TX_BYTES,
     MAX_TX_INPUTS, MAX_TX_OUTPUTS, TARGET_BLOCK_SECONDS, block_subsidy,
-    blocks_until_halving, circulating_supply, coinbase_is_mature, next_halving_height,
+    blocks_until_halving, circulating_supply, coinbase_is_mature, coinbase_maturity_for_spend_height, next_halving_height,
 )
 from gamecoin.chainwork import chain_work
 from gamecoin.logging_utils import log_line
@@ -42,7 +42,17 @@ from gamecoin.utils import (
 from gamecoin.wallet_core import signing_message
 
 VERSION = 2
-NODE_VERSION = '1.0.0'
+NODE_VERSION = '1.1.0'
+MAX_MINER_TAG_LENGTH = 32
+
+
+def normalize_pool_tag(value: str) -> str:
+    tag = ' '.join(str(value or '').strip().split())
+    if len(tag) > MAX_MINER_TAG_LENGTH:
+        raise ValueError(f'Pool tag is too long (max {MAX_MINER_TAG_LENGTH} characters)')
+    if tag and not all(ch.isalnum() or ch in ' ._-' for ch in tag):
+        raise ValueError('Pool tag may contain letters, numbers, spaces, periods, underscores, and hyphens')
+    return tag
 GENESIS_MESSAGE = 'GameCoin mainnet genesis 2026-08-18 | v1.0.0 | subsidy 5 GAME | halving 2102400 | target 150s | no premine'
 GENESIS_TIMESTAMP = 1787103720
 LEGACY_V1_GENESIS_HASH = '383154a7a3749ac7451830c45175c31ef03f51ffbd9397d6817d6b38129de5c7'
@@ -215,7 +225,7 @@ class ChainState:
                     raise ValueError('Coinbase UTXO is missing its creation height')
                 candidate_height = len(self.chain) if spend_height is None else int(spend_height)
                 if not coinbase_is_mature(int(created_height), candidate_height):
-                    remaining = COINBASE_MATURITY - (candidate_height - int(created_height))
+                    remaining = coinbase_maturity_for_spend_height(candidate_height) - (candidate_height - int(created_height))
                     raise ValueError(f'Coinbase output is immature ({max(1, remaining)} blocks remaining)')
             pubkey = bytes.fromhex(inp['pubkey'])
             if address_from_pubkey(pubkey) != prev['address']:
@@ -404,7 +414,7 @@ class ChainState:
             'target_hex': f'{target_for_difficulty(next_units):064x}',
         }
 
-    def mining_template(self, address: str) -> Dict[str, Any]:
+    def mining_template(self, address: str, pool_tag: str = '') -> Dict[str, Any]:
         if not validate_address(address):
             raise ValueError('Invalid GameCoin mining address')
         with self.lock:
@@ -424,11 +434,13 @@ class ChainState:
                 selected_txs.append(dict(tx))
                 total_fees += fee
             block_timestamp = max(int(time.time()), median_time_past(self.chain) + 1)
+            tag = normalize_pool_tag(pool_tag)
+            coinbase_text = f'height:{height}' + (f'|pool:{tag}' if tag else '')
             coinbase = {
                 'timestamp': block_timestamp,
                 'inputs': [],
                 'outputs': [{'address': address, 'amount': expected_coinbase_value(height, total_fees)}],
-                'coinbase': f'height:{height}',
+                'coinbase': coinbase_text,
             }
             coinbase['txid'] = tx_id(coinbase)
             txs = [coinbase] + selected_txs
@@ -968,7 +980,9 @@ class RPCHandler(BaseJSONHandler):
                     **self.sync.info(),
                     'block_reward': block_subsidy(int(tip['height']) + 1),
                     'initial_block_reward': INITIAL_BLOCK_REWARD,
-                    'coinbase_maturity': COINBASE_MATURITY,
+                    'coinbase_maturity': coinbase_maturity_for_spend_height(int(tip['height']) + 1),
+                    'coinbase_maturity_after_activation': COINBASE_MATURITY,
+                    'coinbase_maturity_activation_height': COINBASE_MATURITY_ACTIVATION_HEIGHT,
                     'halving_interval_blocks': HALVING_INTERVAL_BLOCKS,
                     'max_block_transactions': MAX_BLOCK_TRANSACTIONS,
                     'max_block_bytes': MAX_BLOCK_BYTES,
@@ -983,8 +997,10 @@ class RPCHandler(BaseJSONHandler):
             if parsed.path == '/mining/template':
                 if self.sync.info().get('sync_lag', 0) > 0:
                     raise ValueError('Node is still synchronizing; wait until Sync Status is SYNCED')
-                address = parse_qs(parsed.query).get('address', [''])[0]
-                self._json(200, {'ok': True, 'block': self.state.mining_template(address)})
+                query = parse_qs(parsed.query)
+                address = query.get('address', [''])[0]
+                pool_tag = query.get('pool_tag', query.get('tag', ['']))[0]
+                self._json(200, {'ok': True, 'block': self.state.mining_template(address, pool_tag)})
                 return
             if parsed.path.startswith('/utxos/'):
                 address = parsed.path.split('/utxos/', 1)[1]
@@ -1152,7 +1168,7 @@ def load_config(path: str) -> Dict[str, Any]:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description='GameCoin Mainnet node v1.0.0')
+    parser = argparse.ArgumentParser(description='GameCoin Mainnet node v1.1.0')
     parser.add_argument('--config', default='config.json')
     parser.add_argument('--rpc-host', default=None, help='Local wallet/miner RPC bind address')
     parser.add_argument('--rpc-port', type=int, default=None)
@@ -1194,7 +1210,7 @@ def main() -> None:
     p2p_server.rate_limiter = RateLimiter()  # type: ignore[attr-defined]
     p2p_server.seen_peers = {}  # type: ignore[attr-defined]
 
-    print('GameCoin MAINNET node v1.0.0')
+    print('GameCoin MAINNET node v1.1.0')
     print(f'Chain ID / genesis: {GENESIS_HASH}')
     print(f'Wallet/miner RPC: http://{rpc_host}:{rpc_port}')
     print(f'P2P service:      http://{p2p_host}:{p2p_port}')
@@ -1207,7 +1223,7 @@ def main() -> None:
     print(f'Halving interval: {HALVING_INTERVAL_BLOCKS:,} blocks (~10 years)')
     print(f'Maximum supply: {MAX_SUPPLY / 100_000_000:,.8f} GAME')
     print('Press Ctrl+C to stop.')
-    log_line(state.node_log, f'node v1.0.0-mainnet started height={state.tip()["height"]} seed_mode={seed_mode} peers={unique_peers(peers)}')
+    log_line(state.node_log, f'node v1.1.0-mainnet started height={state.tip()["height"]} seed_mode={seed_mode} peers={unique_peers(peers)}')
 
     p2p_thread = threading.Thread(target=p2p_server.serve_forever, name='gamecoin-p2p-server', daemon=True)
     p2p_thread.start()
@@ -1221,7 +1237,7 @@ def main() -> None:
         rpc_server.server_close()
         p2p_server.shutdown()
         p2p_server.server_close()
-        log_line(state.node_log, 'node v1.0.0-mainnet stopped')
+        log_line(state.node_log, 'node v1.1.0-mainnet stopped')
 
 
 if __name__ == '__main__':

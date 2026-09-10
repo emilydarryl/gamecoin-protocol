@@ -17,12 +17,12 @@ VSVersionInfo(
         [
           StringStruct('CompanyName', 'EmilyGaming'),
           StringStruct('FileDescription', 'GameCoin Mainnet Node'),
-          StringStruct('FileVersion', '1.0.0.0'),
+          StringStruct('FileVersion', '1.1.0.0'),
           StringStruct('InternalName', 'GameCoinMainnetNode'),
           StringStruct('LegalCopyright', 'Copyright (c) 2026 EmilyGaming'),
           StringStruct('OriginalFilename', 'GameCoinMainnetNode.exe'),
           StringStruct('ProductName', 'GameCoin Mainnet'),
-          StringStruct('ProductVersion', '1.0.0')
+          StringStruct('ProductVersion', '1.1.0')
         ]
       )
     ]),

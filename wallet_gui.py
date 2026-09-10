@@ -33,7 +33,7 @@ from gamecoin.wallet_core import (
     sign_transaction_input, validate_new_password,
 )
 
-APP_VERSION = '1.0.0'
+APP_VERSION = '1.1.0'
 UPDATE_MANIFEST_URL = 'https://emilygaming.com/gamecoin/mainnet-latest.json'
 DOWNLOAD_PAGE_URL = 'https://emilygaming.com/gamecoin/'
 
@@ -54,6 +54,20 @@ REFRESH_MS = 4000
 
 for _dir in (WALLETS_DIR, DATA_DIR, LOGS_DIR):
     _dir.mkdir(parents=True, exist_ok=True)
+
+MINER_SETTINGS_PATH = DATA_DIR / 'miner-settings.json'
+
+
+def load_pool_tag() -> str:
+    try:
+        value = json.loads(MINER_SETTINGS_PATH.read_text(encoding='utf-8')).get('pool_tag', '')
+        return ' '.join(str(value).strip().split())[:32]
+    except Exception:
+        return ''
+
+
+def save_pool_tag(value: str) -> None:
+    MINER_SETTINGS_PATH.write_text(json.dumps({'pool_tag': value}, indent=2), encoding='utf-8')
 
 
 def bundled_resource(relative_path: str) -> Path:
@@ -260,6 +274,15 @@ def balance_for(address: str) -> int:
 
 def wallet_balance(wallet: Dict[str, Any]) -> int:
     return sum(balance_for(str(item['address'])) for item in all_wallet_key_records(wallet))
+
+
+def wallet_balance_details(wallet: Dict[str, Any]) -> Dict[str, int]:
+    totals = {'balance': 0, 'spendable_balance': 0, 'immature_balance': 0}
+    for item in all_wallet_key_records(wallet):
+        result = request_json(NODE_URL, '/balance/' + quote(str(item['address'])))
+        for key in totals:
+            totals[key] += int(result.get(key, 0))
+    return totals
 
 
 def wallet_stats(wallet: Dict[str, Any]) -> Dict[str, int]:
@@ -514,6 +537,7 @@ class WalletApp(tk.Tk):
         self.max_supply_var = tk.StringVar(value='Maximum supply: —')
         self.halving_var = tk.StringVar(value='Next halving: —')
         self.wallet_pending_var = tk.StringVar(value='Wallet pending: 0')
+        self.funds_status_var = tk.StringVar(value='Spendable: — | Immature mining rewards: —')
         self.transaction_rows_by_iid: Dict[str, Dict[str, Any]] = {}
         self.sync_progress_var = tk.DoubleVar(value=0.0)
         self.sync_progress_text_var = tk.StringVar(value='Sync progress: waiting for local node...')
@@ -526,6 +550,7 @@ class WalletApp(tk.Tk):
         self.session_blocks_var = tk.StringVar(value='Blocks this session: 0')
         self.last_block_var = tk.StringVar(value='Last block: —')
         self.threads_var = tk.IntVar(value=max(1, min(2, os.cpu_count() or 1)))
+        self.pool_tag_var = tk.StringVar(value=load_pool_tag())
         self.to_var = tk.StringVar()
         self.amount_var = tk.StringVar()
 
@@ -672,6 +697,8 @@ class WalletApp(tk.Tk):
         tk.Label(status_strip, textvariable=self.peer_count_var, bg='#ffffff', fg=colors['cyan_dark'], font=('Segoe UI', 10, 'bold')).pack(side='left')
         tk.Label(status_strip, text='  |  ', bg='#ffffff', fg=colors['muted']).pack(side='left')
         tk.Label(status_strip, textvariable=self.wallet_pending_var, bg='#ffffff', fg=colors['purple_dark'], font=('Segoe UI', 10, 'bold')).pack(side='left')
+        tk.Label(status_strip, text='  |  ', bg='#ffffff', fg=colors['muted']).pack(side='left')
+        tk.Label(status_strip, textvariable=self.funds_status_var, bg='#ffffff', fg='#92400e', font=('Segoe UI', 9, 'bold')).pack(side='left')
         tk.Label(status_strip, textvariable=self.node_detail_var, bg='#ffffff', fg=colors['muted'], font=('Segoe UI', 9)).pack(side='right')
 
         tk.Label(self.overview_tab, text='Recent wallet activity', bg=colors['bg'], fg=colors['purple_dark'], font=('Segoe UI', 13, 'bold')).grid(row=2, column=0, columnspan=4, sticky='w', pady=(0, 7))
@@ -768,9 +795,12 @@ class WalletApp(tk.Tk):
         tk.Label(mining_card, text='CPU processes', bg='#ffffff', fg=colors['ink'], font=('Segoe UI', 10, 'bold')).grid(row=1, column=0, sticky='w', pady=(20, 0))
         max_threads = max(1, os.cpu_count() or 1)
         ttk.Spinbox(mining_card, from_=1, to=max_threads, textvariable=self.threads_var, width=7).grid(row=1, column=1, sticky='w', padx=(12, 0), pady=(20, 0))
-        tk.Label(mining_card, textvariable=self.mining_address_var, bg='#ffffff', fg=colors['muted'], font=('Consolas', 9)).grid(row=2, column=0, columnspan=2, sticky='w', pady=(12, 0))
+        tk.Label(mining_card, text='Pool tag', bg='#ffffff', fg=colors['ink'], font=('Segoe UI', 10, 'bold')).grid(row=2, column=0, sticky='w', pady=(14, 0))
+        ttk.Entry(mining_card, textvariable=self.pool_tag_var, width=34).grid(row=2, column=1, sticky='w', padx=(12, 0), pady=(14, 0))
+        tk.Label(mining_card, text='Example: Lazarus. This public pool identity is permanently written into blocks you find.', bg='#ffffff', fg=colors['muted'], font=('Segoe UI', 9)).grid(row=3, column=0, columnspan=2, sticky='w', pady=(5, 0))
+        tk.Label(mining_card, textvariable=self.mining_address_var, bg='#ffffff', fg=colors['muted'], font=('Consolas', 9)).grid(row=4, column=0, columnspan=2, sticky='w', pady=(12, 0))
         stats = tk.Frame(mining_card, bg=colors['soft_purple'], padx=15, pady=15)
-        stats.grid(row=3, column=0, columnspan=2, sticky='ew', pady=(18, 0))
+        stats.grid(row=5, column=0, columnspan=2, sticky='ew', pady=(18, 0))
         stats.columnconfigure(0, weight=1)
         stats.columnconfigure(1, weight=1)
         tk.Label(stats, textvariable=self.miner_status_var, bg=colors['soft_purple'], fg=colors['purple_dark'], font=('Segoe UI', 10, 'bold')).grid(row=0, column=0, columnspan=2, sticky='w')
@@ -780,7 +810,7 @@ class WalletApp(tk.Tk):
         tk.Label(stats, textvariable=self.session_blocks_var, bg=colors['soft_purple'], fg=colors['ink']).grid(row=2, column=1, sticky='w', pady=(6, 0))
         tk.Label(stats, textvariable=self.last_block_var, bg=colors['soft_purple'], fg=colors['ink']).grid(row=3, column=0, columnspan=2, sticky='w', pady=(6, 0))
         mine_buttons = tk.Frame(mining_card, bg='#ffffff')
-        mine_buttons.grid(row=4, column=0, columnspan=2, sticky='w', pady=(18, 0))
+        mine_buttons.grid(row=6, column=0, columnspan=2, sticky='w', pady=(18, 0))
         self.start_mining_button = ttk.Button(mine_buttons, text='Start Mining', command=self.start_mining, style='Lime.TButton', state='disabled')
         self.start_mining_button.pack(side='left')
         self.stop_mining_button = ttk.Button(mine_buttons, text='Stop Mining', command=self.stop_mining, style='Purple.TButton', state='disabled')
@@ -1412,7 +1442,8 @@ class WalletApp(tk.Tk):
                 result['status'] = status
                 if wallet_path:
                     wallet = load_wallet(str(wallet_path))
-                    result['balance'] = wallet_balance(wallet)
+                    result['balances'] = wallet_balance_details(wallet)
+                    result['balance'] = result['balances']['balance']
                     result['wallet_stats'] = wallet_stats(wallet)
                     result['activity'] = recent_activity(wallet, int(status.get('height', 0) or 0))
             except Exception as exc:
@@ -1520,6 +1551,11 @@ class WalletApp(tk.Tk):
             self.node_synced = bool(seed_mode or (sync_status == 'SYNCED' and lag == 0 and peer_count > 0))
             self._update_mining_buttons()
             self.balance_var.set(f'{format_amount(result.get("balance", 0))} GAME')
+            balances = result.get('balances', {})
+            self.funds_status_var.set(
+                f'Spendable: {format_amount(int(balances.get("spendable_balance", 0)))} GAME | '
+                f'Immature mining rewards: {format_amount(int(balances.get("immature_balance", 0)))} GAME'
+            )
             wstats = result.get('wallet_stats', {})
             self.wallet_mined_var.set(f'Blocks mined by wallet: {int(wstats.get("mined_blocks", 0)):,}')
             self.wallet_rewards_var.set(f'Mining rewards earned: {format_amount(int(wstats.get("mining_rewards", 0)))} GAME')
@@ -1662,6 +1698,12 @@ class WalletApp(tk.Tk):
         if threads < 1 or threads > max_threads:
             messagebox.showwarning('CPU Processes', f'Choose between 1 and {max_threads}.', parent=self)
             return
+        pool_tag = ' '.join(self.pool_tag_var.get().strip().split())
+        if len(pool_tag) > 32 or not all(ch.isalnum() or ch in ' ._-' for ch in pool_tag):
+            messagebox.showwarning('Pool Tag', 'Use up to 32 letters, numbers, spaces, periods, underscores, or hyphens.', parent=self)
+            return
+        self.pool_tag_var.set(pool_tag)
+        save_pool_tag(pool_tag)
         try:
             status = node_status()
             if status.get('difficulty_algorithm') != 'adaptive-window-v0.6':
@@ -1674,6 +1716,7 @@ class WalletApp(tk.Tk):
             cmd = [
                 str(APP_DIR / 'GameCoinMainnetMiner.exe'),
                 '--wallet', str(self.current_wallet),
+                '--pool-tag', pool_tag,
                 '--threads', str(threads),
                 '--report-every', '2000',
                 '--log-dir', str(LOGS_DIR),
@@ -1682,6 +1725,7 @@ class WalletApp(tk.Tk):
             cmd = [
                 sys.executable, '-u', str(APP_DIR / 'miner.py'),
                 '--wallet', str(self.current_wallet),
+                '--pool-tag', pool_tag,
                 '--threads', str(threads),
                 '--report-every', '2000',
                 '--log-dir', str(LOGS_DIR),

@@ -58,8 +58,11 @@ def format_rate(rate: float) -> str:
     return f'{rate:.0f} H/s'
 
 
-def mine_one(node: str, wallet_address: str, threads: int, report_every: int, miner_log: Path) -> Optional[Dict[str, Any]]:
-    template_resp = request_json(node, '/mining/template?address=' + quote(wallet_address))
+def mine_one(node: str, wallet_address: str, pool_tag: str, threads: int, report_every: int, miner_log: Path) -> Optional[Dict[str, Any]]:
+    template_url = '/mining/template?address=' + quote(wallet_address)
+    if pool_tag:
+        template_url += '&pool_tag=' + quote(pool_tag)
+    template_resp = request_json(node, template_url)
     template = template_resp['block']
     height = int(template['height'])
     factor = difficulty_factor(int(template['difficulty']))
@@ -202,9 +205,10 @@ def main() -> None:
         sys.stdout.reconfigure(line_buffering=True)
     except Exception:
         pass
-    parser = argparse.ArgumentParser(description='GameCoin Mainnet CPU miner v1.0.0')
+    parser = argparse.ArgumentParser(description='GameCoin Mainnet CPU miner v1.1.0')
     parser.add_argument('--wallet', required=True, help='Path to the wallet receiving mining rewards')
     parser.add_argument('--node', default=DEFAULT_NODE)
+    parser.add_argument('--pool-tag', default='', help='Optional public pool identity (max 32 safe characters)')
     parser.add_argument('--threads', type=int, default=max(1, (os.cpu_count() or 2) // 2), help='CPU processes to use')
     parser.add_argument('--blocks', type=int, default=0, help='Number of accepted blocks to mine; 0 means continue until Ctrl+C')
     parser.add_argument('--report-every', type=int, default=5000)
@@ -219,8 +223,12 @@ def main() -> None:
     wallet = load_wallet(args.wallet)
     miner_log = Path(args.log_dir) / 'miner.log'
     reward_address = str(current_mining_record(wallet)['address'])
-    print('GameCoin MAINNET CPU Miner v1.0.0', flush=True)
+    pool_tag = ' '.join(str(args.pool_tag or '').strip().split())
+    if len(pool_tag) > 32 or not all(ch.isalnum() or ch in ' ._-' for ch in pool_tag):
+        parser.error('--pool-tag may use up to 32 letters, numbers, spaces, periods, underscores, and hyphens')
+    print('GameCoin MAINNET CPU Miner v1.1.0', flush=True)
     print(f'Reward address: {reward_address}', flush=True)
+    print(f'Pool tag: {pool_tag or "none"}', flush=True)
     print(f'CPU processes: {args.threads} of {max_threads} available')
     print(f'Log file: {miner_log.resolve()}')
     print('This miner runs only while this process is open. Press Ctrl+C to stop.')
@@ -229,7 +237,7 @@ def main() -> None:
     mined = 0
     try:
         while args.blocks == 0 or mined < args.blocks:
-            result = mine_one(args.node, reward_address, args.threads, args.report_every, miner_log)
+            result = mine_one(args.node, reward_address, pool_tag, args.threads, args.report_every, miner_log)
             if result and result.get('accepted'):
                 mined += 1
                 print(f'Session blocks mined: {mined}', flush=True)

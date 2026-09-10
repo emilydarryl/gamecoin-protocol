@@ -1,4 +1,4 @@
-# GameCoin Protocol — Mainnet v1.0.0
+# GameCoin Protocol — Mainnet v1.1.0
 
 GameCoin is an open-source proof-of-work cryptocurrency protocol with an encrypted desktop wallet, CPU miner, full node, deterministic consensus rules, Windows packaging, and seed-node deployment files.
 
@@ -7,7 +7,7 @@ The code is published under the **MIT License** so it can be inspected, audited,
 ## Mainnet identity
 
 - Network: `gamecoin-mainnet`
-- P2P protocol: `6`
+- P2P protocol: `7`
 - Genesis: `fb7282bd7a829af95ebcf32da284ab4eb2c807eb65eb6ec63aed86b9ec9a7233`
 - Mainnet RPC: `127.0.0.1:22444` (localhost only)
 - Mainnet P2P: `22445`
@@ -15,13 +15,17 @@ The code is published under the **MIT License** so it can be inspected, audited,
 - Target block time: `150 seconds`
 - Initial subsidy: `5 GAME`
 - Halving interval: `2,102,400 blocks`
-- Coinbase maturity: `100 blocks`
+- Coinbase maturity: `100 blocks` before height 500; `10 blocks` beginning at candidate block height 500
 - Default wallet fee: `0.001 GAME`
 - Genesis premine: `0 GAME`
 
 ## Monetary policy
 
 One GAME equals 100,000,000 atoms. Block 0 has no spendable outputs. Block 1 begins the normal 5 GAME subsidy. The subsidy halves every 2,102,400 blocks using integer-atom arithmetic until it reaches zero.
+
+## v1.1 network upgrade
+
+Version 1.1 adds optional public pool tags to mined blocks and schedules the coinbase-maturity reduction at height 500. Pool tags are committed in the coinbase as `height:<height>|pool:<name>` and appear in explorers only after a block is found. They do not appear in the transaction mempool. All node operators must upgrade before height 500.
 
 ## Consensus baseline
 

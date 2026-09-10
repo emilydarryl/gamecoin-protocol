@@ -9,6 +9,8 @@ from gamecoin.chainwork import block_work, chain_work, target_work
 from gamecoin.consensus import (
     COIN,
     COINBASE_MATURITY,
+    COINBASE_MATURITY_ACTIVATION_HEIGHT,
+    LEGACY_COINBASE_MATURITY,
     MAX_SUPPLY,
     MAX_TX_OUTPUTS,
     block_subsidy,
@@ -50,7 +52,7 @@ class MainnetConsensusTests(unittest.TestCase):
 
     def test_mainnet_identity(self):
         self.assertEqual(node.NETWORK_NAME, 'gamecoin-mainnet')
-        self.assertEqual(node.P2P_PROTOCOL, 6)
+        self.assertEqual(node.P2P_PROTOCOL, 7)
         self.assertEqual(node.GENESIS_HASH, 'fb7282bd7a829af95ebcf32da284ab4eb2c807eb65eb6ec63aed86b9ec9a7233')
 
     def test_mainnet_genesis_has_no_premine(self):
@@ -97,8 +99,18 @@ class MainnetConsensusTests(unittest.TestCase):
         self.assertEqual(chain_work([{'version': 1, 'difficulty': 0}, block]), block_work(block))
 
     def test_coinbase_maturity_boundary(self):
-        self.assertFalse(coinbase_is_mature(10, 10 + COINBASE_MATURITY - 1))
-        self.assertTrue(coinbase_is_mature(10, 10 + COINBASE_MATURITY))
+        legacy_created = COINBASE_MATURITY_ACTIVATION_HEIGHT - LEGACY_COINBASE_MATURITY
+        self.assertFalse(coinbase_is_mature(legacy_created, COINBASE_MATURITY_ACTIVATION_HEIGHT - 1))
+        self.assertTrue(coinbase_is_mature(COINBASE_MATURITY_ACTIVATION_HEIGHT - COINBASE_MATURITY, COINBASE_MATURITY_ACTIVATION_HEIGHT))
+
+    def test_pool_tag_is_committed_to_coinbase(self):
+        state = self.make_state()
+        wallet = create_wallet('tagged-miner')
+        block = state.mining_template(wallet['address'], 'EmilyGaming')
+        self.assertEqual(block['transactions'][0]['coinbase'], 'height:1|pool:EmilyGaming')
+        self.assertEqual(block['transactions'][0]['txid'], tx_id(block['transactions'][0]))
+        with self.assertRaisesRegex(ValueError, 'Pool tag'):
+            state.mining_template(wallet['address'], '<script>')
 
     def test_fee_arithmetic(self):
         self.assertEqual(transaction_fee(5 * COIN, 5 * COIN - 100_000), 100_000)
