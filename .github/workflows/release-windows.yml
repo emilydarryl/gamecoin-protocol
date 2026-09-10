@@ -43,7 +43,7 @@ jobs:
 
       - name: Verify fixed mainnet identity
         run: >-
-          python3 -c "import node; assert node.NETWORK_NAME == 'gamecoin-mainnet'; assert node.P2P_PROTOCOL == 6; assert node.GENESIS_HASH == 'fb7282bd7a829af95ebcf32da284ab4eb2c807eb65eb6ec63aed86b9ec9a7233'; print('Verified genesis:', node.GENESIS_HASH)"
+          python3 -c "import node; assert node.NETWORK_NAME == 'gamecoin-mainnet'; assert node.P2P_PROTOCOL == 7; assert node.GENESIS_HASH == 'fb7282bd7a829af95ebcf32da284ab4eb2c807eb65eb6ec63aed86b9ec9a7233'; print('Verified genesis:', node.GENESIS_HASH)"
 
       - name: Render deterministic branding assets
         run: python3 build_tools/render_assets.py
@@ -87,18 +87,18 @@ jobs:
       - name: Generate SHA-256 checksum
         shell: pwsh
         run: |
-          $Installer = 'dist/GameCoin-Setup-v1.0.0-Mainnet.exe'
+          $Installer = 'dist/GameCoin-Setup-v1.1.0-Mainnet.exe'
           if (-not (Test-Path $Installer)) { throw "Installer not found: $Installer" }
           $Hash = (Get-FileHash -Algorithm SHA256 $Installer).Hash.ToLowerInvariant()
-          "$Hash  GameCoin-Setup-v1.0.0-Mainnet.exe" | Set-Content -Encoding ascii 'dist/GameCoin-Setup-v1.0.0-Mainnet.exe.sha256.txt'
+          "$Hash  GameCoin-Setup-v1.1.0-Mainnet.exe" | Set-Content -Encoding ascii 'dist/GameCoin-Setup-v1.1.0-Mainnet.exe.sha256.txt'
           Write-Host "SHA-256: $Hash"
 
       - name: Upload unsigned release candidate
         uses: actions/upload-artifact@v4
         with:
-          name: GameCoin-v1.0.0-Mainnet-unsigned
+          name: GameCoin-v1.1.0-Mainnet-unsigned
           if-no-files-found: error
           retention-days: 14
           path: |
-            dist/GameCoin-Setup-v1.0.0-Mainnet.exe
-            dist/GameCoin-Setup-v1.0.0-Mainnet.exe.sha256.txt
+            dist/GameCoin-Setup-v1.1.0-Mainnet.exe
+            dist/GameCoin-Setup-v1.1.0-Mainnet.exe.sha256.txt
