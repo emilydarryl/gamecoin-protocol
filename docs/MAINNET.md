@@ -1,4 +1,4 @@
-# GameCoin Mainnet v1.0.0
+# GameCoin Mainnet v1.1.0
 
 ## Genesis
 

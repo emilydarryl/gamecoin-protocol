@@ -1,5 +1,5 @@
 #define MyAppName "GameCoin Mainnet"
-#define MyAppVersion "1.0.0"
+#define MyAppVersion "1.1.0"
 #define MyAppPublisher "EmilyGaming"
 #define MyAppURL "https://emilygaming.com/gamecoin/"
 #define MyAppExeName "GameCoinMainnetWallet.exe"
@@ -16,7 +16,7 @@ DefaultDirName={autopf}\GameCoin Mainnet
 DefaultGroupName=GameCoin Mainnet
 DisableProgramGroupPage=yes
 OutputDir=..\dist
-OutputBaseFilename=GameCoin-Setup-v1.0.0-Mainnet
+OutputBaseFilename=GameCoin-Setup-v1.1.0-Mainnet
 Compression=lzma2
 SolidCompression=yes
 WizardStyle=modern
@@ -25,15 +25,15 @@ ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 UninstallDisplayIcon={app}\{#MyAppExeName}
 SetupLogging=yes
-VersionInfoVersion=1.0.0.0
-VersionInfoTextVersion=1.0.0
-VersionInfoProductVersion=1.0.0.0
-VersionInfoProductTextVersion=1.0.0
+VersionInfoVersion=1.1.0.0
+VersionInfoTextVersion=1.1.0
+VersionInfoProductVersion=1.1.0.0
+VersionInfoProductTextVersion=1.1.0
 VersionInfoCompany=EmilyGaming
 VersionInfoDescription=GameCoin Mainnet Setup
 VersionInfoProductName=GameCoin Mainnet
 VersionInfoCopyright=Copyright (c) 2026 EmilyGaming
-VersionInfoOriginalFileName=GameCoin-Setup-v1.0.0-Mainnet.exe
+VersionInfoOriginalFileName=GameCoin-Setup-v1.1.0-Mainnet.exe
 SetupIconFile=..\assets\gamecoin_protocol_mark.ico
 
 [Files]
@@ -48,7 +48,7 @@ Source: "..\SECURITY.md"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\PRIVACY.md"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\DISCLAIMER.md"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\MAINNET_GENESIS.json"; DestDir: "{app}"; Flags: ignoreversion
-Source: "..\RELEASE_NOTES-v1.0.0.md"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\RELEASE_NOTES-v1.1.0.md"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\assets\gamecoin_protocol_mark.ico"; DestDir: "{app}\assets"; Flags: ignoreversion
 Source: "..\assets\gamecoin_protocol_full.png"; DestDir: "{app}\assets"; Flags: ignoreversion
 

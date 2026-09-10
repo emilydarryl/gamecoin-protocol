@@ -4,7 +4,9 @@ COIN = 100_000_000
 INITIAL_BLOCK_REWARD = 5 * COIN
 HALVING_INTERVAL_BLOCKS = 2_102_400
 TARGET_BLOCK_SECONDS = 150
-COINBASE_MATURITY = 100
+LEGACY_COINBASE_MATURITY = 100
+COINBASE_MATURITY = 10
+COINBASE_MATURITY_ACTIVATION_HEIGHT = 500
 
 # Consensus resource ceilings frozen for GameCoin Mainnet v1.0.0.
 MAX_TX_INPUTS = 128
@@ -26,13 +28,18 @@ def block_subsidy(height: int) -> int:
     return INITIAL_BLOCK_REWARD >> halvings
 
 
+def coinbase_maturity_for_spend_height(spend_height: int) -> int:
+    """Return the consensus maturity enforced for a candidate spend block."""
+    return COINBASE_MATURITY if int(spend_height) >= COINBASE_MATURITY_ACTIVATION_HEIGHT else LEGACY_COINBASE_MATURITY
+
+
 def coinbase_is_mature(created_height: int, spend_height: int) -> bool:
     """Return whether a coinbase output may be spent in ``spend_height``."""
     created_height = int(created_height)
     spend_height = int(spend_height)
     if created_height < 0 or spend_height < 0:
         return False
-    return spend_height - created_height >= COINBASE_MATURITY
+    return spend_height - created_height >= coinbase_maturity_for_spend_height(spend_height)
 
 
 def circulating_supply(height: int) -> int:

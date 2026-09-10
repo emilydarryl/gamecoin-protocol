@@ -1,5 +1,5 @@
 [Unit]
-Description=GameCoin v1.0.0 Mainnet Seed Node
+Description=GameCoin v1.1.0 Mainnet Seed Node
 After=network-online.target
 Wants=network-online.target
 

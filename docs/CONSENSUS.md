@@ -1,4 +1,4 @@
-# GameCoin Mainnet v1.0.0 Consensus
+# GameCoin Mainnet v1.1.0 Consensus
 
 - Network ID: `gamecoin-mainnet`
 - P2P protocol: `6`

@@ -99,7 +99,7 @@ Then send me the path that command reports.
 "@
 }
 
-Write-Host "Building GameCoin Mainnet v1.0.0 for Windows..."
+Write-Host "Building GameCoin Mainnet v1.1.0 for Windows..."
 py -3 -m pip install --upgrade pip
 py -3 -m pip install -r requirements.txt -r build_tools/requirements-build.txt
 if ($LASTEXITCODE -ne 0) { throw "Dependency installation failed" }
@@ -109,7 +109,7 @@ py -3 -m unittest discover -s tests -v
 if ($LASTEXITCODE -ne 0) { throw "Mainnet tests failed; refusing to build installer" }
 
 Write-Host "Verifying fixed mainnet identity..."
-py -3 -c "import node; assert node.NETWORK_NAME == 'gamecoin-mainnet'; assert node.P2P_PROTOCOL == 6; assert node.GENESIS_HASH == 'fb7282bd7a829af95ebcf32da284ab4eb2c807eb65eb6ec63aed86b9ec9a7233'; print('Verified genesis:', node.GENESIS_HASH)"
+py -3 -c "import node; assert node.NETWORK_NAME == 'gamecoin-mainnet'; assert node.P2P_PROTOCOL == 7; assert node.GENESIS_HASH == 'fb7282bd7a829af95ebcf32da284ab4eb2c807eb65eb6ec63aed86b9ec9a7233'; print('Verified genesis:', node.GENESIS_HASH)"
 if ($LASTEXITCODE -ne 0) { throw "Mainnet identity/genesis verification failed; refusing to build installer" }
 
 Remove-Item -Recurse -Force build, dist -ErrorAction SilentlyContinue
@@ -148,4 +148,4 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 Write-Host ""
-Write-Host "Build complete: dist\GameCoin-Setup-v1.0.0-Mainnet.exe"
+Write-Host "Build complete: dist\GameCoin-Setup-v1.1.0-Mainnet.exe"
